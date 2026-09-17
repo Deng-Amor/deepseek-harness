@@ -274,6 +274,165 @@ publish(topic: string, payload: InspectorJsonValue, monotonicMs?: number): void
 
 Source: [`packages/experimental/inspector/src/index.ts`](../../packages/experimental/inspector/src/index.ts)
 
+<a id="ctxmarketplace--marketplaceservice"></a>
+
+### `ctx.marketplace` — `MarketplaceService`
+
+市场服务
+
+```ts cordis-catalog
+/**
+ * 搜索注册表中的插件。
+ *
+ * @param query - 用空格分隔的搜索词。
+ * @param page - 从 1 开始的结果页码。
+ * @param sort - 结果排序方式。
+ * @returns 匹配的插件页和总数。
+ */
+async search(query: string, page: number = 1, sort: 'stars' | 'updated' = 'stars'): Promise<RegistrySearchResult>
+
+/**
+ * 查找一个注册表插件。
+ *
+ * @param fullName - 插件的完整注册表名称。
+ * @returns 匹配的插件；找不到时返回 `undefined`。
+ */
+async details(fullName: string): Promise<RegistryPlugin | undefined>
+
+/**
+ * 获取注册表和本地安装数量。
+ *
+ * @returns 注册表生成时间、插件总数和本地安装数量。
+ */
+async info(): Promise<{ pluginCount: number; generatedAt: string; installedCount: number }>
+
+/**
+ * 下载并激活注册表中的插件。
+ *
+ * @param fullName - 要安装的插件完整名称。
+ * @returns 已安装插件的结果。
+ */
+async install(fullName: string): Promise<InstallResult>
+
+/**
+ * 卸载一个本地插件。
+ *
+ * @param packageName - 要卸载的包名。
+ */
+async uninstall(packageName: string): Promise<void>
+
+/**
+ * 激活一个已安装插件。
+ *
+ * @param packageName - 要激活的包名。
+ */
+async activate(packageName: string): Promise<void>
+
+/**
+ * 停用一个活动插件。
+ *
+ * @param packageName - 要停用的包名。
+ */
+async deactivate(packageName: string): Promise<void>
+
+/**
+ * 列出本地已安装插件。
+ *
+ * @returns 已安装插件的当前记录。
+ */
+async listInstalled(): Promise<PluginInfo[]>
+```
+
+Source: [`packages/host/plugin-registry/src/marketplace.ts`](../../packages/host/plugin-registry/src/marketplace.ts)
+
+<a id="ctxpluginregistry--pluginregistry"></a>
+
+### `ctx.pluginRegistry` — `PluginRegistry`
+
+管理本地插件的安装、激活状态和持久化记录。
+
+```ts cordis-catalog
+/**
+ * 扫描插件目录并刷新已安装插件记录。
+ *
+ * @returns 扫描到的插件记录。
+ */
+async scan(): Promise<PluginInfo[]>
+
+/**
+ * 从 ZIP 归档安装插件。
+ *
+ * @param options - 归档字节和原始文件名。
+ * @returns 新安装的插件记录。
+ */
+async installFromZip(options: { zipData: Uint8Array; originalName: string }): Promise<PluginInfo>
+
+/**
+ * 从 GitHub 仓库安装插件。
+ *
+ * @param options - GitHub 仓库和可选提交引用。
+ * @returns 新安装的插件记录。
+ */
+async installFromGitHub(options: { repo: string; ref?: string }): Promise<PluginInfo>
+
+/**
+ * 卸载一个已安装插件。
+ *
+ * @param pluginName - 要卸载的插件名称。
+ */
+async uninstall(pluginName: string): Promise<void>
+
+/**
+ * 激活一个已安装插件。
+ *
+ * @param pluginName - 要激活的插件名称。
+ */
+async activate(pluginName: string): Promise<void>
+
+/**
+ * 停用一个活动插件。
+ *
+ * @param pluginName - 要停用的插件名称。
+ */
+async deactivate(pluginName: string): Promise<void>
+
+/**
+ * 读取一个插件的已保存配置。
+ *
+ * @param pluginName - 插件名称。
+ * @returns 配置副本。
+ */
+async getConfig(pluginName: string): Promise<Record<string, unknown>>
+
+/**
+ * 合并并保存一个插件的配置。
+ *
+ * @param pluginName - 插件名称。
+ * @param config - 要合并的配置字段。
+ */
+async setConfig(pluginName: string, config: Record<string, unknown>): Promise<void>
+
+/**
+ * 查询一个已安装插件。
+ *
+ * @param pluginName - 插件名称。
+ * @returns 插件记录；未安装时返回 `null`。
+ */
+async getInfo(pluginName: string): Promise<PluginInfo | null>
+
+/**
+ * 列出已安装插件。
+ *
+ * @returns 当前插件记录。
+ */
+async list(): Promise<PluginInfo[]>
+
+/** 从磁盘加载已保存的插件记录。 */
+async loadRegistry(): Promise<void>
+```
+
+Source: [`packages/host/plugin-registry/src/index.ts`](../../packages/host/plugin-registry/src/index.ts)
+
 <a id="cordis-events"></a>
 
 ### `cordis/*` events

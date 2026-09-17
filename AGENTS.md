@@ -102,6 +102,10 @@ pnpm dsh --profile headless "task"  # run one task from source (needs DEEPSEEK_A
 pnpm run demo:ptc -- "task"  # headless PTC mode run (needs key)
 ```
 
+## Daily remote-update check
+
+Before the first build, test, application launch, or code edit on each local calendar day, fetch the current references for both `origin` and `upstream` and compare the active branch with them. Report any new commits on `origin` or `upstream`. If `upstream` has advanced, tell the user that the upstream repository has updates and ask whether to synchronize; never pull, merge, rebase, or otherwise synchronize either remote without the user's explicit instruction.
+
 ### Host sandbox failures
 
 If a required `gh`, `pnpm`, build, test, or generator command fails because the sandbox blocks credentials, network, IPC, watching, or nested `sandbox-exec`, retry unchanged with the narrowest host escalation. Require sandbox evidence; never bypass test failures or the product sandbox.

@@ -14,9 +14,12 @@ import { existsSync } from 'node:fs'
 
 // ── 类型定义 ──────────────────────────────────────────
 
+/** Origin metadata for an installed plugin. */
 export type PluginSource = { type: 'zip'; originalName: string } | { type: 'github'; repo: string; ref?: string }
+/** Persisted lifecycle state for an installed plugin. */
 export type PluginStatus = 'installed' | 'active' | 'error'
 
+/** Plugin manifest read from the installed package. */
 export interface PluginManifest {
   name: string
   version: string
@@ -34,6 +37,7 @@ export interface PluginManifest {
   homepage?: string
 }
 
+/** Persisted record for one locally installed plugin. */
 export interface PluginInfo {
   name: string
   version: string
@@ -46,8 +50,11 @@ export interface PluginInfo {
   error?: string | undefined
 }
 
+/** Filesystem locations used by the installed-plugin registry. */
 export interface PluginRegistryConfig {
+  /** Directory containing installed plugin packages. */
   pluginsDir: string
+  /** JSON file containing persisted plugin records. */
   registryFile: string
 }
 
@@ -59,6 +66,7 @@ declare module '@deepseek-ai/cordis' {
 
 // ── 主服务 ─────────────────────────────────────────────
 
+/** 管理本地插件的安装、激活状态和持久化记录。 */
 export class PluginRegistry extends Service {
   private installed = new Map<string, PluginInfo>()
   private activeEntries = new Map<string, string>()
@@ -67,7 +75,11 @@ export class PluginRegistry extends Service {
     super(ctx, 'pluginRegistry')
   }
 
-  /** 扫描插件目录 */
+  /**
+   * 扫描插件目录并刷新已安装插件记录。
+   *
+   * @returns 扫描到的插件记录。
+   */
   async scan(): Promise<PluginInfo[]> {
     const results: PluginInfo[] = []
     const dir = this.config.pluginsDir
@@ -101,7 +113,12 @@ export class PluginRegistry extends Service {
     return results
   }
 
-  /** 从 ZIP 安装 */
+  /**
+   * 从 ZIP 归档安装插件。
+   *
+   * @param options - 归档字节和原始文件名。
+   * @returns 新安装的插件记录。
+   */
   async installFromZip(options: { zipData: Uint8Array; originalName: string }): Promise<PluginInfo> {
     const tempDir = join(this.config.pluginsDir, `.tmp-${Date.now()}`)
     try {
@@ -132,7 +149,12 @@ export class PluginRegistry extends Service {
     }
   }
 
-  /** 从 GitHub 安装 */
+  /**
+   * 从 GitHub 仓库安装插件。
+   *
+   * @param options - GitHub 仓库和可选提交引用。
+   * @returns 新安装的插件记录。
+   */
   async installFromGitHub(options: { repo: string; ref?: string }): Promise<PluginInfo> {
     const { owner, repo } = this.parseGitHubRepo(options.repo)
     const ref = options.ref || 'main'
@@ -145,7 +167,11 @@ export class PluginRegistry extends Service {
     })
   }
 
-  /** 卸载插件 */
+  /**
+   * 卸载一个已安装插件。
+   *
+   * @param pluginName - 要卸载的插件名称。
+   */
   async uninstall(pluginName: string): Promise<void> {
     const info = this.installed.get(pluginName)
     if (!info) throw new Error(`插件 "${pluginName}" 未安装`)
@@ -161,7 +187,11 @@ export class PluginRegistry extends Service {
     await this.saveRegistry()
   }
 
-  /** 激活插件（热插拔） */
+  /**
+   * 激活一个已安装插件。
+   *
+   * @param pluginName - 要激活的插件名称。
+   */
   async activate(pluginName: string): Promise<void> {
     const info = this.installed.get(pluginName)
     if (!info) throw new Error(`插件 "${pluginName}" 未安装`)
@@ -205,7 +235,11 @@ export class PluginRegistry extends Service {
     return entry
   }
 
-  /** 停用插件（热卸载） */
+  /**
+   * 停用一个活动插件。
+   *
+   * @param pluginName - 要停用的插件名称。
+   */
   async deactivate(pluginName: string): Promise<void> {
     const info = this.installed.get(pluginName)
     if (!info || info.status !== 'active') return
@@ -223,12 +257,24 @@ export class PluginRegistry extends Service {
     await this.saveRegistry()
   }
 
+  /**
+   * 读取一个插件的已保存配置。
+   *
+   * @param pluginName - 插件名称。
+   * @returns 配置副本。
+   */
   async getConfig(pluginName: string): Promise<Record<string, unknown>> {
     const info = this.installed.get(pluginName)
     if (!info) throw new Error(`插件 "${pluginName}" 未安装`)
     return { ...info.config }
   }
 
+  /**
+   * 合并并保存一个插件的配置。
+   *
+   * @param pluginName - 插件名称。
+   * @param config - 要合并的配置字段。
+   */
   async setConfig(pluginName: string, config: Record<string, unknown>): Promise<void> {
     const info = this.installed.get(pluginName)
     if (!info) throw new Error(`插件 "${pluginName}" 未安装`)
@@ -242,10 +288,21 @@ export class PluginRegistry extends Service {
     }
   }
 
+  /**
+   * 查询一个已安装插件。
+   *
+   * @param pluginName - 插件名称。
+   * @returns 插件记录；未安装时返回 `null`。
+   */
   async getInfo(pluginName: string): Promise<PluginInfo | null> {
     return this.installed.get(pluginName) ?? null
   }
 
+  /**
+   * 列出已安装插件。
+   *
+   * @returns 当前插件记录。
+   */
   async list(): Promise<PluginInfo[]> {
     return [...this.installed.values()]
   }
@@ -322,6 +379,7 @@ export class PluginRegistry extends Service {
     await writeFile(this.config.registryFile, JSON.stringify([...this.installed.values()], null, 2), 'utf-8')
   }
 
+  /** 从磁盘加载已保存的插件记录。 */
   async loadRegistry(): Promise<void> {
     try {
       const data = JSON.parse(await readFile(this.config.registryFile, 'utf-8')) as PluginInfo[]

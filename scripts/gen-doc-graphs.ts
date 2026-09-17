@@ -99,6 +99,22 @@ const GROUP_ORDER = [
 
 const SERVICE_ROLES: ServiceRole[] = [
   {
+    key: 'pluginRegistry',
+    pkg: 'plugin-registry',
+    title: 'Installed plugin registry',
+    mode: 'core',
+    consumers: ['plugin-manager', 'plugin-registry'],
+    note: 'Owns local plugin records, installation, activation, deactivation, and their persisted state; the marketplace service installs selected registry entries through it.',
+  },
+  {
+    key: 'marketplace',
+    pkg: 'plugin-registry',
+    title: 'Verified plugin marketplace',
+    mode: 'core',
+    consumers: ['plugin-manager'],
+    note: 'Loads the configured registry, searches verified entries, and delegates installation to the installed-plugin registry.',
+  },
+  {
     key: 'mcpResources',
     pkg: 'mcp-resources',
     title: 'Scoped MCP resource access',

@@ -33,7 +33,10 @@ export class PluginManagerGateway extends TypertRemoteService {
     return this.ctx.get('marketplace') as MarketplaceService
   }
 
-  /** List all installed plugins with their status. */
+  /**
+   * List all installed plugins with their status.
+   * @returns Installed plugin summaries.
+   */
   @Remote('list')
   async list(): Promise<PluginManagerEntry[]> {
     try {
@@ -52,7 +55,11 @@ export class PluginManagerGateway extends TypertRemoteService {
     }
   }
 
-  /** Activate (hot-plug) a plugin. */
+  /**
+   * Activate a plugin without restarting the host.
+   * @param pluginName - Installed plugin name.
+   * @returns Whether activation succeeded and any failure message.
+   */
   @Remote('activate')
   async activate(pluginName: string): Promise<{ ok: boolean; error?: string }> {
     try {
@@ -63,7 +70,11 @@ export class PluginManagerGateway extends TypertRemoteService {
     }
   }
 
-  /** Deactivate (hot-unplug) a plugin. */
+  /**
+   * Deactivate an active plugin without restarting the host.
+   * @param pluginName - Installed plugin name.
+   * @returns Whether deactivation succeeded and any failure message.
+   */
   @Remote('deactivate')
   async deactivate(pluginName: string): Promise<{ ok: boolean; error?: string }> {
     try {
@@ -74,7 +85,11 @@ export class PluginManagerGateway extends TypertRemoteService {
     }
   }
 
-  /** Uninstall a plugin completely. */
+  /**
+   * Remove an installed plugin.
+   * @param pluginName - Installed plugin name.
+   * @returns Whether removal succeeded and any failure message.
+   */
   @Remote('uninstall')
   async uninstall(pluginName: string): Promise<{ ok: boolean; error?: string }> {
     try {
@@ -85,7 +100,11 @@ export class PluginManagerGateway extends TypertRemoteService {
     }
   }
 
-  /** Install from a URL (GitHub release ZIP or direct ZIP). */
+  /**
+   * Install a plugin from a GitHub repository or ZIP URL.
+   * @param url - GitHub repository shorthand or ZIP URL.
+   * @returns Whether installation succeeded, the installed plugin, and any failure message.
+   */
   @Remote('installFromUrl')
   async installFromUrl(url: string): Promise<{
     ok: boolean
@@ -133,7 +152,11 @@ export class PluginManagerGateway extends TypertRemoteService {
     }
   }
 
-  /** Search the configured verified marketplace. */
+  /**
+   * Search the configured verified marketplace.
+   * @param query - Search text.
+   * @returns Matching marketplace entries and their installation state.
+   */
   @Remote('searchMarketplace')
   async searchMarketplace(query: string): Promise<PluginMarketplaceSearchResult> {
     const result = await this.marketplace.search(query)
@@ -152,7 +175,11 @@ export class PluginManagerGateway extends TypertRemoteService {
     }
   }
 
-  /** Install and activate one verified marketplace plugin. */
+  /**
+   * Install and activate a verified marketplace plugin.
+   * @param fullName - Full marketplace entry name.
+   * @returns Whether installation succeeded, the installed plugin, and any failure message.
+   */
   @Remote('installMarketplace')
   async installMarketplace(fullName: string): Promise<{ ok: boolean; plugin?: PluginManagerEntry; error?: string }> {
     try {

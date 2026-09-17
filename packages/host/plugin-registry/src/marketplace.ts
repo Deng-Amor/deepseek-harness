@@ -36,6 +36,7 @@ export interface InstallResult {
 
 /** 市场服务 */
 export class MarketplaceService extends Service {
+  /** Client used to query the configured verified registry. */
   readonly registry: RegistryClient
   private pluginRegistry: PluginRegistry
 
@@ -49,24 +50,45 @@ export class MarketplaceService extends Service {
     } as Partial<RegistryConfig>)
   }
 
-  /** 搜索插件 */
-  async search(query: string, page = 1, sort: 'stars' | 'updated' = 'stars'): Promise<RegistrySearchResult> {
+  /**
+   * 搜索注册表中的插件。
+   *
+   * @param query - 用空格分隔的搜索词。
+   * @param page - 从 1 开始的结果页码。
+   * @param sort - 结果排序方式。
+   * @returns 匹配的插件页和总数。
+   */
+  async search(query: string, page: number = 1, sort: 'stars' | 'updated' = 'stars'): Promise<RegistrySearchResult> {
     return this.registry.search(query, page, sort)
   }
 
-  /** 查看插件详情 */
+  /**
+   * 查找一个注册表插件。
+   *
+   * @param fullName - 插件的完整注册表名称。
+   * @returns 匹配的插件；找不到时返回 `undefined`。
+   */
   async details(fullName: string): Promise<RegistryPlugin | undefined> {
     return this.registry.find(fullName)
   }
 
-  /** 获取注册表信息 */
+  /**
+   * 获取注册表和本地安装数量。
+   *
+   * @returns 注册表生成时间、插件总数和本地安装数量。
+   */
   async info(): Promise<{ pluginCount: number; generatedAt: string; installedCount: number }> {
     const regInfo = await this.registry.getRegistryInfo()
     const installed = await this.pluginRegistry.list()
     return { ...regInfo, installedCount: installed.length }
   }
 
-  /** 安装插件（热插拔） */
+  /**
+   * 下载并激活注册表中的插件。
+   *
+   * @param fullName - 要安装的插件完整名称。
+   * @returns 已安装插件的结果。
+   */
   async install(fullName: string): Promise<InstallResult> {
     const plugin = await this.registry.find(fullName)
     if (!plugin) throw new Error(`插件 "${fullName}" 不在注册表中`)
@@ -111,22 +133,38 @@ export class MarketplaceService extends Service {
     throw new Error('npm 源安装暂未实现')
   }
 
-  /** 卸载插件 */
+  /**
+   * 卸载一个本地插件。
+   *
+   * @param packageName - 要卸载的包名。
+   */
   async uninstall(packageName: string): Promise<void> {
     await this.pluginRegistry.uninstall(packageName)
   }
 
-  /** 激活插件 */
+  /**
+   * 激活一个已安装插件。
+   *
+   * @param packageName - 要激活的包名。
+   */
   async activate(packageName: string): Promise<void> {
     await this.pluginRegistry.activate(packageName)
   }
 
-  /** 停用插件 */
+  /**
+   * 停用一个活动插件。
+   *
+   * @param packageName - 要停用的包名。
+   */
   async deactivate(packageName: string): Promise<void> {
     await this.pluginRegistry.deactivate(packageName)
   }
 
-  /** 列出已安装插件 */
+  /**
+   * 列出本地已安装插件。
+   *
+   * @returns 已安装插件的当前记录。
+   */
   async listInstalled(): Promise<PluginInfo[]> {
     return this.pluginRegistry.list()
   }

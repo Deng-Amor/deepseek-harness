@@ -1791,6 +1791,24 @@ export interface Config {
 
 Source: [`packages/llm/plugin-package-inventory-deepseek/src/index.ts:32`](../packages/llm/plugin-package-inventory-deepseek/src/index.ts)
 
+<a id="deepseek-aidsh-plugin-registry"></a>
+
+## `@deepseek-ai/dsh-plugin-registry`
+
+Requires: `loader`
+
+```ts config-catalog
+/** Filesystem locations used by the installed-plugin registry. */
+export interface PluginRegistryConfig {
+  /** Directory containing installed plugin packages. */
+  pluginsDir: string
+  /** JSON file containing persisted plugin records. */
+  registryFile: string
+}
+```
+
+Source: [`packages/host/plugin-registry/src/index.ts:54`](../packages/host/plugin-registry/src/index.ts)
+
 <a id="deepseek-aidsh-ptc-runtime-node"></a>
 
 ## `@deepseek-ai/dsh-ptc-runtime-node`
@@ -3625,6 +3643,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-settings-general` ([`packages/client/ui-settings-general/src/index.ts`](../packages/client/ui-settings-general/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-settings-models` ([`packages/client/ui-settings-models/src/index.ts`](../packages/client/ui-settings-models/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-settings-plugin-inventory` ([`packages/client/ui-settings-plugin-inventory/src/index.ts`](../packages/client/ui-settings-plugin-inventory/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-settings-plugin-manager` ([`packages/client/ui-settings-plugin-manager/src/index.ts`](../packages/client/ui-settings-plugin-manager/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-settings-plugins` ([`packages/client/ui-settings-plugins/src/index.ts`](../packages/client/ui-settings-plugins/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-settings-unarchive-sessions` ([`packages/client/ui-settings-unarchive-sessions/src/index.ts`](../packages/client/ui-settings-unarchive-sessions/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-sidebar` ([`packages/client/ui-sidebar/src/index.ts`](../packages/client/ui-sidebar/src/index.ts))
@@ -3657,6 +3676,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-host-directory-picker-auto` — requires `webServer` · `loader` ([`packages/host/directory-picker-auto/src/index.ts`](../packages/host/directory-picker-auto/src/index.ts))
 - `@deepseek-ai/dsh-host-directory-picker-native` ([`packages/host/directory-picker-native/src/index.ts`](../packages/host/directory-picker-native/src/index.ts))
 - `@deepseek-ai/dsh-host-plugin-inventory` — requires `loader` ([`packages/host/plugin-inventory/src/index.ts`](../packages/host/plugin-inventory/src/index.ts))
+- `@deepseek-ai/dsh-host-plugin-manager` — requires `pluginRegistry` · `marketplace` ([`packages/host/plugin-manager/src/index.ts`](../packages/host/plugin-manager/src/index.ts))
 - `@deepseek-ai/dsh-llm` ([`packages/llm/llm/src/index.ts`](../packages/llm/llm/src/index.ts))
 - `@deepseek-ai/dsh-lsp` ([`packages/lsp/lsp/src/index.ts`](../packages/lsp/lsp/src/index.ts))
 - `@deepseek-ai/dsh-mcp-resources` — requires `tools` ([`packages/mcp/mcp-resources/src/index.ts`](../packages/mcp/mcp-resources/src/index.ts))

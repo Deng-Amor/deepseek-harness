@@ -48,8 +48,10 @@ export const zh = {
   installedTab: '已安装',
 } as const
 
+/** Keys supplied by the Plugin Manager locale dictionary. */
 export type PluginManagerLocaleKey = keyof typeof zh
 
+/** English Plugin Manager locale dictionary. */
 export const en: Record<PluginManagerLocaleKey, string> = {
   tab: 'Plugins',
   loading: 'Loading…',

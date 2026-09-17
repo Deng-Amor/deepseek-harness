@@ -9,6 +9,7 @@ import { readFile } from 'node:fs/promises'
 
 // ── 类型定义（兼容 YELEBAI dsh-plugin-marketplace 格式） ──
 
+/** One verified plugin entry published by the marketplace registry. */
 export interface RegistryPlugin {
   fullName: string
   description: string | null
@@ -40,17 +41,20 @@ export interface RegistryPlugin {
   starGrowth7d: number
 }
 
+/** Complete marketplace registry document. */
 export interface RegistryData {
   schemaVersion: number
   generatedAt: string
   plugins: RegistryPlugin[]
 }
 
+/** One page of marketplace search results. */
 export interface RegistrySearchResult {
   totalCount: number
   items: RegistryPlugin[]
 }
 
+/** Source location and cache policy for the marketplace registry. */
 export interface RegistryConfig {
   /** 注册表 URL（https:// 或 file://） */
   url?: string
@@ -76,8 +80,14 @@ export class RegistryClient {
     this.timeoutMs = config?.timeoutMs ?? 10000
   }
 
-  /** 搜索插件 */
-  async search(query: string, page = 1, sort: 'stars' | 'updated' = 'stars'): Promise<RegistrySearchResult> {
+  /**
+   * Search the marketplace registry.
+   * @param query - Space-separated search terms.
+   * @param page - One-based result page.
+   * @param sort - Result ordering.
+   * @returns The matching entries and total count.
+   */
+  async search(query: string, page: number = 1, sort: 'stars' | 'updated' = 'stars'): Promise<RegistrySearchResult> {
     const registry = await this.load()
     const terms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean)
     const filtered = registry.plugins.filter((plugin) => {
@@ -101,18 +111,29 @@ export class RegistryClient {
     }
   }
 
-  /** 按 fullName 查找插件 */
+  /**
+   * Find a plugin by its full registry name.
+   * @param fullName - Full registry name.
+   * @returns The matching entry, if present.
+   */
   async find(fullName: string): Promise<RegistryPlugin | undefined> {
     const key = fullName.trim().toLocaleLowerCase()
     return (await this.load()).plugins.find(p => p.fullName.toLocaleLowerCase() === key)
   }
 
-  /** 按 packageName 查找插件 */
+  /**
+   * Find a plugin by its package name.
+   * @param packageName - Published package name.
+   * @returns The matching entry, if present.
+   */
   async findByPackage(packageName: string): Promise<RegistryPlugin | undefined> {
     return (await this.load()).plugins.find(p => p.packageName === packageName)
   }
 
-  /** 获取注册表信息 */
+  /**
+   * Read marketplace registry metadata.
+   * @returns The plugin count and generation timestamp.
+   */
   async getRegistryInfo(): Promise<{ pluginCount: number; generatedAt: string }> {
     const registry = await this.load()
     return { pluginCount: registry.plugins.length, generatedAt: registry.generatedAt }

@@ -1297,6 +1297,63 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'marketplace',
+    summary: '市场服务',
+    description: '市场服务',
+    methods: [
+      {
+        signature: 'readonly registry: RegistryClient',
+        description: 'Client used to query the configured verified registry.',
+        parameters: [],
+      },
+      {
+        signature: 'async search(query: string, page: number = 1, sort: \'stars\' | \'updated\' = \'stars\'): Promise<RegistrySearchResult>',
+        description: '搜索注册表中的插件。',
+        parameters: [{ name: 'query', description: '用空格分隔的搜索词。' }, { name: 'page', description: '从 1 开始的结果页码。' }, { name: 'sort', description: '结果排序方式。' }],
+        returns: '匹配的插件页和总数。',
+      },
+      {
+        signature: 'async details(fullName: string): Promise<RegistryPlugin | undefined>',
+        description: '查找一个注册表插件。',
+        parameters: [{ name: 'fullName', description: '插件的完整注册表名称。' }],
+        returns: '匹配的插件；找不到时返回 `undefined`。',
+      },
+      {
+        signature: 'async info(): Promise<{ pluginCount: number; generatedAt: string; installedCount: number }>',
+        description: '获取注册表和本地安装数量。',
+        parameters: [],
+        returns: '注册表生成时间、插件总数和本地安装数量。',
+      },
+      {
+        signature: 'async install(fullName: string): Promise<InstallResult>',
+        description: '下载并激活注册表中的插件。',
+        parameters: [{ name: 'fullName', description: '要安装的插件完整名称。' }],
+        returns: '已安装插件的结果。',
+      },
+      {
+        signature: 'async uninstall(packageName: string): Promise<void>',
+        description: '卸载一个本地插件。',
+        parameters: [{ name: 'packageName', description: '要卸载的包名。' }],
+      },
+      {
+        signature: 'async activate(packageName: string): Promise<void>',
+        description: '激活一个已安装插件。',
+        parameters: [{ name: 'packageName', description: '要激活的包名。' }],
+      },
+      {
+        signature: 'async deactivate(packageName: string): Promise<void>',
+        description: '停用一个活动插件。',
+        parameters: [{ name: 'packageName', description: '要停用的包名。' }],
+      },
+      {
+        signature: 'async listInstalled(): Promise<PluginInfo[]>',
+        description: '列出本地已安装插件。',
+        parameters: [],
+        returns: '已安装插件的当前记录。',
+      },
+    ],
+  },
+  {
     key: 'mcpResources',
     summary: 'Scoped resource access plus three tools shared by configured MCP servers.',
     description: 'Scoped resource access plus three tools shared by configured MCP servers.',
@@ -1394,6 +1451,74 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Select whether plan mode should be active. Between turns the method appends the change immediately because no in-turn pre-step will run until another prompt starts a turn. The open-turn fold is the idle signal: agent status stays `running` through post-turn checkpointing, when no further in-turn pre-step runs. During an open turn the selection remains pending until the next accepted in-turn pre-step. Repeated selection of the current or already-pending state is a no-op.',
         parameters: [{ name: 'agent', description: 'The agent to switch.' }, { name: 'active', description: 'Whether plan mode should be active.' }],
         returns: 'what happened: `committed` (logged now), `queued` (awaiting the next accepted in-turn pre-step), `cancelled` (an opposite pending selection was cleared; the logged state already matches), or `noop` (already in that state).',
+      },
+    ],
+  },
+  {
+    key: 'pluginRegistry',
+    summary: '管理本地插件的安装、激活状态和持久化记录。',
+    description: '管理本地插件的安装、激活状态和持久化记录。',
+    methods: [
+      {
+        signature: 'async scan(): Promise<PluginInfo[]>',
+        description: '扫描插件目录并刷新已安装插件记录。',
+        parameters: [],
+        returns: '扫描到的插件记录。',
+      },
+      {
+        signature: 'async installFromZip(options: { zipData: Uint8Array; originalName: string }): Promise<PluginInfo>',
+        description: '从 ZIP 归档安装插件。',
+        parameters: [{ name: 'options', description: '归档字节和原始文件名。' }],
+        returns: '新安装的插件记录。',
+      },
+      {
+        signature: 'async installFromGitHub(options: { repo: string; ref?: string }): Promise<PluginInfo>',
+        description: '从 GitHub 仓库安装插件。',
+        parameters: [{ name: 'options', description: 'GitHub 仓库和可选提交引用。' }],
+        returns: '新安装的插件记录。',
+      },
+      {
+        signature: 'async uninstall(pluginName: string): Promise<void>',
+        description: '卸载一个已安装插件。',
+        parameters: [{ name: 'pluginName', description: '要卸载的插件名称。' }],
+      },
+      {
+        signature: 'async activate(pluginName: string): Promise<void>',
+        description: '激活一个已安装插件。',
+        parameters: [{ name: 'pluginName', description: '要激活的插件名称。' }],
+      },
+      {
+        signature: 'async deactivate(pluginName: string): Promise<void>',
+        description: '停用一个活动插件。',
+        parameters: [{ name: 'pluginName', description: '要停用的插件名称。' }],
+      },
+      {
+        signature: 'async getConfig(pluginName: string): Promise<Record<string, unknown>>',
+        description: '读取一个插件的已保存配置。',
+        parameters: [{ name: 'pluginName', description: '插件名称。' }],
+        returns: '配置副本。',
+      },
+      {
+        signature: 'async setConfig(pluginName: string, config: Record<string, unknown>): Promise<void>',
+        description: '合并并保存一个插件的配置。',
+        parameters: [{ name: 'pluginName', description: '插件名称。' }, { name: 'config', description: '要合并的配置字段。' }],
+      },
+      {
+        signature: 'async getInfo(pluginName: string): Promise<PluginInfo | null>',
+        description: '查询一个已安装插件。',
+        parameters: [{ name: 'pluginName', description: '插件名称。' }],
+        returns: '插件记录；未安装时返回 `null`。',
+      },
+      {
+        signature: 'async list(): Promise<PluginInfo[]>',
+        description: '列出已安装插件。',
+        parameters: [],
+        returns: '当前插件记录。',
+      },
+      {
+        signature: 'async loadRegistry(): Promise<void>',
+        description: '从磁盘加载已保存的插件记录。',
+        parameters: [],
       },
     ],
   },
@@ -4527,6 +4652,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type InspectorJsonValue = InspectorJsonPrimitive | readonly InspectorJsonValue[] | InspectorJsonObject;',
   },
   {
+    name: 'InstallResult',
+    declaration: 'export interface InstallResult {\n    pluginName: string;\n    version: string;\n    activated: boolean;\n    requiresRestart: boolean;\n    message: string;\n}',
+  },
+  {
     name: 'InvariantFailure',
     declaration: 'export type InvariantFailure = (message: string) => never;',
   },
@@ -4891,6 +5020,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface PermissionCatalog {\n    options: PresetOption[];\n}',
   },
   {
+    name: 'PluginInfo',
+    declaration: 'export interface PluginInfo {\n    name: string;\n    version: string;\n    description: string;\n    manifest: PluginManifest;\n    status: PluginStatus;\n    installedAt: string;\n    source: PluginSource;\n    config: Record<string, unknown>;\n    error?: string | undefined;\n}',
+  },
+  {
+    name: 'PluginManifest',
+    declaration: 'export interface PluginManifest {\n    name: string;\n    version: string;\n    description: string;\n    author?: string;\n    license?: string;\n    entry: {\n        host?: string;\n        client?: string;\n    };\n    inject?: string[];\n    config?: Record<string, unknown>;\n    tools?: string[];\n    platform?: string[];\n    dsh?: {\n        minVersion?: string;\n        client?: boolean;\n    };\n    hooks?: {\n        onInstall?: string;\n        onUninstall?: string;\n        onActivate?: string;\n        onDeactivate?: string;\n    };\n    repository?: {\n        type: string;\n        url: string;\n    };\n    homepage?: string;\n}',
+  },
+  {
+    name: 'PluginSource',
+    declaration: 'export type PluginSource = {\n    type: \'zip\';\n    originalName: string;\n} | {\n    type: \'github\';\n    repo: string;\n    ref?: string;\n};',
+  },
+  {
+    name: 'PluginStatus',
+    declaration: 'export type PluginStatus = \'installed\' | \'active\' | \'error\';',
+  },
+  {
     name: 'PostToolDecision',
     declaration: 'export type PostToolDecision = {\n    kind: \'accept\';\n    content?: ContentBlock[];\n    value?: never;\n    additionalContexts?: UserMessage[];\n} | {\n    kind: \'accept\';\n    value: JsonValue;\n    content?: never;\n    additionalContexts?: UserMessage[];\n} | {\n    kind: \'block\';\n    feedback: ContentBlock[];\n    additionalContexts?: UserMessage[];\n};',
   },
@@ -5053,6 +5198,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'RedactedSecret',
     declaration: 'export interface RedactedSecret {\n    path: string[];\n    set: boolean;\n}',
+  },
+  {
+    name: 'RegistryClient',
+    declaration: 'export class RegistryClient {\n    constructor(config?: Partial<RegistryConfig>);\n    async search(query: string, page: number = 1, sort: \'stars\' | \'updated\' = \'stars\'): Promise<RegistrySearchResult>;\n    async find(fullName: string): Promise<RegistryPlugin | undefined>;\n    async findByPackage(packageName: string): Promise<RegistryPlugin | undefined>;\n    async getRegistryInfo(): Promise<{\n        pluginCount: number;\n        generatedAt: string;\n    }>;\n}',
+  },
+  {
+    name: 'RegistryConfig',
+    declaration: 'export interface RegistryConfig {\n    url?: string;\n    cacheMs: number;\n    timeoutMs: number;\n}',
+  },
+  {
+    name: 'RegistryPlugin',
+    declaration: 'export interface RegistryPlugin {\n    fullName: string;\n    description: string | null;\n    stars: number;\n    forks: number;\n    language: string | null;\n    license: string | null;\n    updatedAt: string;\n    defaultBranch: string;\n    verifiedCommit: string;\n    htmlUrl: string;\n    topics: string[];\n    packageName: string;\n    version: string;\n    bundlePatch: string;\n    hasClient: boolean;\n    verifiedAt: string;\n    install: {\n        mode: \'automatic\' | \'guided\';\n        source: \'github\' | \'npm\' | \'tarball\' | \'manual\';\n        spec: string;\n        profiles: string[];\n        requiresBuildApproval: boolean;\n        requiresRestart: boolean;\n        manualSteps: boolean;\n        instructionsUrl: string;\n    };\n    categories: string[];\n    starGrowth7d: number;\n}',
+  },
+  {
+    name: 'RegistrySearchResult',
+    declaration: 'export interface RegistrySearchResult {\n    totalCount: number;\n    items: RegistryPlugin[];\n}',
   },
   {
     name: 'RemoteError',
