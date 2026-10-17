@@ -4,7 +4,6 @@ import { defineConfig } from 'tsdown'
 export default defineConfig({
   entry: [
     'lib/types/index.js',
-    'lib/types/invariant.js',
     'lib/types/marketplace.js',
     'lib/types/registry.js',
   ],
