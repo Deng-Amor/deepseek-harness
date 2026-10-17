@@ -26,10 +26,6 @@
       "types": "./lib/types/registry.d.ts",
       "default": "./lib/registry.js"
     },
-    "./invariant": {
-      "types": "./lib/types/invariant.d.ts",
-      "default": "./lib/invariant.js"
-    },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
@@ -37,7 +33,6 @@
     "lib/index.js",
     "lib/marketplace.js",
     "lib/registry.js",
-    "lib/invariant.js",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",
@@ -53,7 +48,6 @@
     "@deepseek-ai/dsh-fs": "workspace:^"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^",
     "@deepseek-ai/cordis-plugin-loader": "workspace:^"
   }

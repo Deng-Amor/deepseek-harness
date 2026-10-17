@@ -19,9 +19,6 @@
     },
     {
       "path": "../../../packages/typert/protocol"
-    },
-    {
-      "path": "../../../packages/runtime-diagnostics/invariants"
     }
   ]
 }
